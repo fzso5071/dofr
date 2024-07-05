@@ -1,0 +1,890 @@
+<html lang="zh-CN" class="translated-ltr"><head>
+    <meta charset="UTF-8">
+    <script src="jquery-3.6.0.js"></script>
+    <script src="jquery-ui.js"></script>
+    <script src="jquery.form.min.js"></script>
+    <title>DOFR冰与火之舞赛事排行榜</title>
+
+    <style type="text/css">
+body {
+    margin: 0;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 120%;
+    min-height: 100%;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+        #wrapper {
+            background-color: black;
+            background-image: linear-gradient(to right, rgba(170,117,240), rgba(166,240,240), rgba(166,240,240), rgba(170,117,240)); /* 使用斜角渐变背景 */
+            min-height: 100%;
+        }
+
+        /* Hit Margin Styles */
+        .hitmargins-tooearly { color: #ff6565; }
+        .hitmargins-early { color: #EB9A46; }
+        .hitmargins-earlyperfect { color: #E3E370; }
+        .hitmargins-perfect { color: #86E370; }
+        .hitmargins-lateperfect { color: #E3E370; }
+        .hitmargins-late { color: #EB9A46; }
+        .hitmargins-toolate { color: #ED3E3E; }
+        .hitmargins-miss { color: #DA59FF; }
+        .hitmargins-overload { color: #DA59FF; }
+
+        /* Additional Styles */
+        .clean { opacity: 0.5; }
+        table { text-align: center; width: 0%; font-weight: 100; border-collapse: collapse; margin: auto; }
+        tbody:hover { background-color: rgba(255, 255, 255, 0.1); transition: 200ms; }
+        tr { font-weight: 100; text-overflow: ellipsis; transition: 500ms; border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
+        .number { font-weight: bold; font-size: 25px; width: 10%; }
+        .name { text-align: left; }
+        .xaccuracy { padding: 0; width: 120px; }
+        .avgxaccuracy { padding: 0; width: 120px; }
+        .score { padding: 0; width: 120px; }
+        .pureperfect { color: gold; }
+        .hitmargins { width: 45px; padding: 0; }
+        .map { width: 120px; padding-top: 10px; padding-bottom: 10px; }
+        .composer { width: 120px; padding-top: 10px; padding-bottom: 10px; }
+        .nodata { margin-top: 0.1px; }
+        h1:hover { transition: 0.2s linear; text-shadow: 0 0 6px #ffffff; }
+        .load { font-size: 20px; border: 2px solid white; border-radius: 5px; background-color: transparent; color: rgb(255, 255, 255); transition: 0.2s ease; }
+        .load:hover {background-color:rgba(166,240,240, 1); transition: 0.2s ease; cursor: pointer; box-shadow: 0 0 10px 0 #ffffff; }
+        .load:active { background-color: rgba(166,240,240, 0.7); transition: 0s; }
+        .blank { background-color: transparent; text-decoration: none; padding: 0; border: 0; }
+        #leaderboard { transition: 1000ms; }
+        hr { transition: 1000ms; }
+        td { white-space: nowrap; }
+
+        .passing-line {
+            border-bottom: 2px solid #ffd700;
+            position: relative;
+        }
+
+        .passing-line::before {
+            content: "晋级线";
+            position: absolute;
+            left: -70px;
+            top: 80px;
+            transform: translateY(-50%);
+            background-color: #ffd700;
+            padding: 5px 15px;
+            border: 1px solid black;
+            border-radius: 10px;
+            font-size: 0.8em;
+            box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+            color: black;
+        }
+        @media (max-width: 768px) {
+    /* 针对平板和手机的样式调整 */
+    #leaderboard, #headline {
+        width: 100% !important;
+    }
+
+    .name, .map, .composer, .xaccuracy, .score {
+        padding: 5px !important;
+        font-size: 14px !important;
+    }
+
+    .number, .hitmargins {
+        font-size: 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    /* 针对更小屏幕的手机的样式调整 */
+    h1, h2, h3 {
+        font-size: 18px !important;
+    }
+
+    .load {
+        font-size: 16px !important;
+    }
+}
+    </style>
+</head>
+
+<body onload="setWidth()">
+    <div id="wrapper">
+        <br>
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <h1 style="color: white; margin-right: 20px;" class="item animate__animated animate__fadeindown">DOFR冰与火之舞赛事排行榜</h1>
+        </div>
+        <h3>2024夏季分组赛</h3>
+        <hr style="width: 942.6px;" id="headline">
+        <div id="2024summer">
+            <table cellpadding="10" id="leaderboard" class="item animate__animated animate__fadein animate__slow" style="width: 942.6px;">
+                <tbody>
+                    <tr class="">
+                        <td class="number item">名次</td>
+                        <td class="name title item">选手</td>
+                        <td class="map title item">谱面序号</td>
+                        <td class="map title item">曲师</td>
+                        <td class="map title item">谱面</td>
+                        <td class="hitmargins hitmargins-miss title item">按太快</td>
+                        <td class="hitmargins hitmargins-tooearly title item">提前</td>
+                        <td class="hitmargins hitmargins-early title item">太快</td>
+                        <td class="hitmargins hitmargins-earlyperfect title item">稍快</td>
+                        <td class="hitmargins hitmargins-perfect title item">完美</td>
+                        <td class="hitmargins hitmargins-lateperfect title item">稍慢</td>
+                        <td class="hitmargins hitmargins-late title item">太慢</td>
+                        <td class="hitmargins hitmargins-miss title item">错过</td>
+                        <td class="accuracy title item">X精准</td>
+                        <td class="score title item">总精准</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-1">
+                    <tr class="box" id="dataRow-0-0-1">
+                        <td class="number item" rowspan="12">#1</td>
+                        <td class="name item" rowspan="3">倒依</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">0</td>
+                        <td class="hitmargins hitmargins-early item">0</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">0</td>
+                        <td class="hitmargins hitmargins-perfect item">2213</td>
+                        <td class="hitmargins hitmargins-lateperfect item">0</td>
+                        <td class="hitmargins hitmargins-late item">0</td>
+                        <td class="hitmargins hitmargins-miss clean item">0</td>
+                        <td class="accuracy item">100.00%</td>
+                        <td class="totalaccuracy item" rowspan="12">300.00%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-1">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">0</td>
+                        <td class="hitmargins hitmargins-early item">0</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">0</td>
+                        <td class="hitmargins hitmargins-perfect item">2133</td>
+                        <td class="hitmargins hitmargins-lateperfect item">0</td>
+                        <td class="hitmargins hitmargins-late item">0</td>
+                        <td class="hitmargins hitmargins-miss item">0</td>
+                        <td class="accuracy item">100.00%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-1">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">0</td>
+                        <td class="hitmargins hitmargins-early item">0</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">0</td>
+                        <td class="hitmargins hitmargins-perfect item">1547(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">0</td>
+                        <td class="hitmargins hitmargins-late item">0</td>
+                        <td class="hitmargins hitmargins-miss item">0</td>
+                        <td class="accuracy item">100.00%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-2">
+                    <tr class="box" id="dataRow-0-0-2">
+                        <td class="number item" rowspan="12">#2</td>
+                        <td class="name item" rowspan="3">ARES_PTG</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">2</td>
+                        <td class="hitmargins hitmargins-early item">1</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">7</td>
+                        <td class="hitmargins hitmargins-perfect item">2203</td>
+                        <td class="hitmargins hitmargins-lateperfect item">2</td>
+                        <td class="hitmargins hitmargins-late item">0</td>
+                        <td class="hitmargins hitmargins-miss clean item">0</td>
+                        <td class="accuracy item">99.80%</td>
+                        <td class="totalaccuracy item" rowspan="12">299.31%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-2">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">1</td>
+                        <td class="hitmargins hitmargins-early item">1</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">2</td>
+                        <td class="hitmargins hitmargins-perfect item">2127</td>
+                        <td class="hitmargins hitmargins-lateperfect item">0</td>
+                        <td class="hitmargins hitmargins-late item">0</td>
+                        <td class="hitmargins hitmargins-miss item">0</td>
+                        <td class="accuracy item">99.88%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-2">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">3</td>
+                        <td class="hitmargins hitmargins-early item">3</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">0</td>
+                        <td class="hitmargins hitmargins-perfect item">1540(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">2</td>
+                        <td class="hitmargins hitmargins-late item">2</td>
+                        <td class="hitmargins hitmargins-miss item">0</td>
+                        <td class="accuracy item">99.63%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-1">
+                    <tr class="box" id="dataRow-0-0-3">
+                        <td class="number item" rowspan="12">#3</td>
+                        <td class="name item" rowspan="3">冰鹿ID</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">2</td>
+                        <td class="hitmargins hitmargins-early item">1</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">7</td>
+                        <td class="hitmargins hitmargins-perfect item">2202</td>
+                        <td class="hitmargins hitmargins-lateperfect item">2</td>
+                        <td class="hitmargins hitmargins-late item">1</td>
+                        <td class="hitmargins hitmargins-miss clean item">0</td>
+                        <td class="accuracy item">99.77%</td>
+                        <td class="totalaccuracy item" rowspan="12">298.95%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-3">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">1</td>
+                        <td class="hitmargins hitmargins-early item">0</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">4</td>
+                        <td class="hitmargins hitmargins-perfect item">2123</td>
+                        <td class="hitmargins hitmargins-lateperfect item">4</td>
+                        <td class="hitmargins hitmargins-late item">2</td>
+                        <td class="hitmargins hitmargins-miss item">0</td>
+                        <td class="accuracy item">99.81%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-3">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">0</td>
+                        <td class="hitmargins hitmargins-early item">3</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">16</td>
+                        <td class="hitmargins hitmargins-perfect item">1517(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">7</td>
+                        <td class="hitmargins hitmargins-late item">4</td>
+                        <td class="hitmargins hitmargins-miss item">0</td>
+                        <td class="accuracy item">99.37%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-2">
+                    <tr class="box" id="dataRow-0-0-4">
+                        <td class="number item" rowspan="12">#4</td>
+                        <td class="name item" rowspan="3">杰西Jesse呀</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">3</td>
+                        <td class="hitmargins hitmargins-early item">2</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">34</td>
+                        <td class="hitmargins hitmargins-perfect item">2173</td>
+                        <td class="hitmargins hitmargins-lateperfect item">4</td>
+                        <td class="hitmargins hitmargins-late item">0</td>
+                        <td class="hitmargins hitmargins-miss clean item">0</td>
+                        <td class="accuracy item">99.41%</td>
+                        <td class="totalaccuracy item" rowspan="12">297.52%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-4">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">3</td>
+                        <td class="hitmargins hitmargins-early item">5</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">10</td>
+                        <td class="hitmargins hitmargins-perfect item">2096</td>
+                        <td class="hitmargins hitmargins-lateperfect item">15</td>
+                        <td class="hitmargins hitmargins-late item">7</td>
+                        <td class="hitmargins hitmargins-miss item">0</td>
+                        <td class="accuracy item">99.26%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-4">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">7</td>
+                        <td class="hitmargins hitmargins-early item">11</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">16</td>
+                        <td class="hitmargins hitmargins-perfect item">1513(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">6</td>
+                        <td class="hitmargins hitmargins-late item">1</td>
+                        <td class="hitmargins hitmargins-miss item">0</td>
+                        <td class="accuracy item">98.85%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-1">
+                    <tr class="box" id="dataRow-0-0-5">
+                        <td class="number item" rowspan="12">#5</td>
+                        <td class="name item" rowspan="3">MitsukiYume</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">1</td>
+                        <td class="hitmargins hitmargins-tooearly item">19</td>
+                        <td class="hitmargins hitmargins-early item">2</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">8</td>
+                        <td class="hitmargins hitmargins-perfect item">2159</td>
+                        <td class="hitmargins hitmargins-lateperfect item">22</td>
+                        <td class="hitmargins hitmargins-late item">9</td>
+                        <td class="hitmargins hitmargins-miss clean item">13</td>
+                        <td class="accuracy item">98.06%</td>
+                        <td class="totalaccuracy item" rowspan="12">292.59%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-5">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">2</td>
+                        <td class="hitmargins hitmargins-early item">4</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">10</td>
+                        <td class="hitmargins hitmargins-perfect item">2090</td>
+                        <td class="hitmargins hitmargins-lateperfect item">23</td>
+                        <td class="hitmargins hitmargins-late item">5</td>
+                        <td class="hitmargins hitmargins-miss item">1</td>
+                        <td class="accuracy item">99.24%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-5">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">15</td>
+                        <td class="hitmargins hitmargins-tooearly item">36</td>
+                        <td class="hitmargins hitmargins-early item">12</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">8</td>
+                        <td class="hitmargins hitmargins-perfect item">1490(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">13</td>
+                        <td class="hitmargins hitmargins-late item">9</td>
+                        <td class="hitmargins hitmargins-miss item">15</td>
+                        <td class="accuracy item">95.29%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-2">
+                    <tr class="box" id="dataRow-0-0-6">
+                        <td class="number item" rowspan="12">#6</td>
+                        <td class="name item" rowspan="3">米米世界蜜桃公主</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">2</td>
+                        <td class="hitmargins hitmargins-tooearly item">28</td>
+                        <td class="hitmargins hitmargins-early item">17</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">59</td>
+                        <td class="hitmargins hitmargins-perfect item">2055</td>
+                        <td class="hitmargins hitmargins-lateperfect item">17</td>
+                        <td class="hitmargins hitmargins-late item">12</td>
+                        <td class="hitmargins hitmargins-miss clean item">21</td>
+                        <td class="accuracy item">96.00%</td>
+                        <td class="totalaccuracy item" rowspan="12">283.56%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-6">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">3</td>
+                        <td class="hitmargins hitmargins-tooearly item">32</td>
+                        <td class="hitmargins hitmargins-early item">25</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">18</td>
+                        <td class="hitmargins hitmargins-perfect item">1947</td>
+                        <td class="hitmargins hitmargins-lateperfect item">64</td>
+                        <td class="hitmargins hitmargins-late item">49</td>
+                        <td class="hitmargins hitmargins-miss item">30</td>
+                        <td class="accuracy item">94.27%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-6">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">8</td>
+                        <td class="hitmargins hitmargins-tooearly item">36</td>
+                        <td class="hitmargins hitmargins-early item">22</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">36</td>
+                        <td class="hitmargins hitmargins-perfect item">1407(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">36</td>
+                        <td class="hitmargins hitmargins-late item">13</td>
+                        <td class="hitmargins hitmargins-miss item">33</td>
+                        <td class="accuracy item">93.29%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-1">
+                    <tr class="box" id="dataRow-0-0-7">
+                        <td class="number item" rowspan="12">#7</td>
+                        <td class="name item" rowspan="3">吃米饭的呆编剧</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">11</td>
+                        <td class="hitmargins hitmargins-tooearly item">66</td>
+                        <td class="hitmargins hitmargins-early item">48</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">82</td>
+                        <td class="hitmargins hitmargins-perfect item">1963</td>
+                        <td class="hitmargins hitmargins-lateperfect item">40</td>
+                        <td class="hitmargins hitmargins-late item">35</td>
+                        <td class="hitmargins hitmargins-miss clean item">45</td>
+                        <td class="accuracy item">91.71%</td>
+                        <td class="totalaccuracy item" rowspan="12">282.54%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-7">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">9</td>
+                        <td class="hitmargins hitmargins-early item">9</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">8</td>
+                        <td class="hitmargins hitmargins-perfect item">2089</td>
+                        <td class="hitmargins hitmargins-lateperfect item">22</td>
+                        <td class="hitmargins hitmargins-late item">5</td>
+                        <td class="hitmargins hitmargins-miss item">0</td>
+                        <td class="accuracy item">98.92%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-7">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">18</td>
+                        <td class="hitmargins hitmargins-tooearly item">46</td>
+                        <td class="hitmargins hitmargins-early item">25</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">30</td>
+                        <td class="hitmargins hitmargins-perfect item">1401(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">42</td>
+                        <td class="hitmargins hitmargins-late item">10</td>
+                        <td class="hitmargins hitmargins-miss item">39</td>
+                        <td class="accuracy item">91.91%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-2">
+                    <tr class="box" id="dataRow-0-0-8">
+                        <td class="number item" rowspan="12">#8</td>
+                        <td class="name item" rowspan="3">hooks1</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">2</td>
+                        <td class="hitmargins hitmargins-tooearly item">38</td>
+                        <td class="hitmargins hitmargins-early item">38</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">95</td>
+                        <td class="hitmargins hitmargins-perfect item">1920</td>
+                        <td class="hitmargins hitmargins-lateperfect item">96</td>
+                        <td class="hitmargins hitmargins-late item">48</td>
+                        <td class="hitmargins hitmargins-miss clean item">36</td>
+                        <td class="accuracy item">92.74%</td>
+                        <td class="totalaccuracy item" rowspan="12">282.02%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-8">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">1</td>
+                        <td class="hitmargins hitmargins-tooearly item">19</td>
+                        <td class="hitmargins hitmargins-early item">45</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">79</td>
+                        <td class="hitmargins hitmargins-perfect item">1919</td>
+                        <td class="hitmargins hitmargins-lateperfect item">46</td>
+                        <td class="hitmargins hitmargins-late item">26</td>
+                        <td class="hitmargins hitmargins-miss item">18</td>
+                        <td class="accuracy item">94.98%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-8">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">25</td>
+                        <td class="hitmargins hitmargins-early item">36</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">74</td>
+                        <td class="hitmargins hitmargins-perfect item">1391(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">11</td>
+                        <td class="hitmargins hitmargins-late item">16</td>
+                        <td class="hitmargins hitmargins-miss item">19</td>
+                        <td class="accuracy item">94.30%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-1">
+                    <tr class="box" id="dataRow-0-0-9">
+                        <td class="number item" rowspan="12">#9</td>
+                        <td class="name item" rowspan="3">路遇伞下人</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">7</td>
+                        <td class="hitmargins hitmargins-early item">3</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">36</td>
+                        <td class="hitmargins hitmargins-perfect item">2145</td>
+                        <td class="hitmargins hitmargins-lateperfect item">27</td>
+                        <td class="hitmargins hitmargins-late item">2</td>
+                        <td class="hitmargins hitmargins-miss clean item">0</td>
+                        <td class="accuracy item">98.90%</td>
+                        <td class="totalaccuracy item" rowspan="12">281.24%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-9">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">2</td>
+                        <td class="hitmargins hitmargins-tooearly item">12</td>
+                        <td class="hitmargins hitmargins-early item">32</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">44</td>
+                        <td class="hitmargins hitmargins-perfect item">1972</td>
+                        <td class="hitmargins hitmargins-lateperfect item">36</td>
+                        <td class="hitmargins hitmargins-late item">36</td>
+                        <td class="hitmargins hitmargins-miss item">13</td>
+                        <td class="accuracy item">96.02%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-9">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">25</td>
+                        <td class="hitmargins hitmargins-tooearly item">66</td>
+                        <td class="hitmargins hitmargins-early item">55</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">73</td>
+                        <td class="hitmargins hitmargins-perfect item">1266(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">49</td>
+                        <td class="hitmargins hitmargins-late item">44</td>
+                        <td class="hitmargins hitmargins-miss item">60</td>
+                        <td class="accuracy item">86.32%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-2">
+                    <tr class="box" id="dataRow-0-0-10">
+                        <td class="number item" rowspan="12">#10</td>
+                        <td class="name item" rowspan="3">red-mushroom</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">32</td>
+                        <td class="hitmargins hitmargins-early item">10</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">47</td>
+                        <td class="hitmargins hitmargins-perfect item">2123</td>
+                        <td class="hitmargins hitmargins-lateperfect item">16</td>
+                        <td class="hitmargins hitmargins-late item">6</td>
+                        <td class="hitmargins hitmargins-miss clean item">11</td>
+                        <td class="accuracy item">97.24%</td>
+                        <td class="totalaccuracy item" rowspan="12">276.52%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-10">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">0</td>
+                        <td class="hitmargins hitmargins-tooearly item">12</td>
+                        <td class="hitmargins hitmargins-early item">25</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">49</td>
+                        <td class="hitmargins hitmargins-perfect item">2024</td>
+                        <td class="hitmargins hitmargins-lateperfect item">19</td>
+                        <td class="hitmargins hitmargins-late item">10</td>
+                        <td class="hitmargins hitmargins-miss item">6</td>
+                        <td class="accuracy item">97.43%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-10">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">48</td>
+                        <td class="hitmargins hitmargins-tooearly item">114</td>
+                        <td class="hitmargins hitmargins-early item">43</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">41</td>
+                        <td class="hitmargins hitmargins-perfect item">1248(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">71</td>
+                        <td class="hitmargins hitmargins-late item">56</td>
+                        <td class="hitmargins hitmargins-miss item">88</td>
+                        <td class="accuracy item">81.85%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-1">
+                    <tr class="box" id="dataRow-0-0-11">
+                        <td class="number item" rowspan="12">#11</td>
+                        <td class="name item" rowspan="3">镇寺圣剑awa</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">14</td>
+                        <td class="hitmargins hitmargins-tooearly item">89</td>
+                        <td class="hitmargins hitmargins-early item">55</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">63</td>
+                        <td class="hitmargins hitmargins-perfect item">1902</td>
+                        <td class="hitmargins hitmargins-lateperfect item">69</td>
+                        <td class="hitmargins hitmargins-late item">42</td>
+                        <td class="hitmargins hitmargins-miss clean item">82</td>
+                        <td class="accuracy item">88.72%</td>
+                        <td class="totalaccuracy item" rowspan="12">266.31%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-11">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">45</td>
+                        <td class="hitmargins hitmargins-tooearly item">41</td>
+                        <td class="hitmargins hitmargins-early item">37</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">41</td>
+                        <td class="hitmargins hitmargins-perfect item">1917</td>
+                        <td class="hitmargins hitmargins-lateperfect item">50</td>
+                        <td class="hitmargins hitmargins-late item">43</td>
+                        <td class="hitmargins hitmargins-miss item">45</td>
+                        <td class="accuracy item">92.76%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-11">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">34</td>
+                        <td class="hitmargins hitmargins-tooearly item">87</td>
+                        <td class="hitmargins hitmargins-early item">34</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">36</td>
+                        <td class="hitmargins hitmargins-perfect item">1292(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">56</td>
+                        <td class="hitmargins hitmargins-late item">49</td>
+                        <td class="hitmargins hitmargins-miss item">80</td>
+                        <td class="accuracy item">84.83%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-2">
+                    <tr class="box" id="dataRow-0-0-12">
+                        <td class="number item" rowspan="12">#12</td>
+                        <td class="name item" rowspan="3">毒毒毒呀ToxicDu</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">10</td>
+                        <td class="hitmargins hitmargins-tooearly item">121</td>
+                        <td class="hitmargins hitmargins-early item">74</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">123</td>
+                        <td class="hitmargins hitmargins-perfect item">1776</td>
+                        <td class="hitmargins hitmargins-lateperfect item">78</td>
+                        <td class="hitmargins hitmargins-late item">42</td>
+                        <td class="hitmargins hitmargins-miss clean item">120</td>
+                        <td class="accuracy item">85.13%</td>
+                        <td class="totalaccuracy item" rowspan="12">261.94%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-12">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">5</td>
+                        <td class="hitmargins hitmargins-tooearly item">47</td>
+                        <td class="hitmargins hitmargins-early item">54</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">67</td>
+                        <td class="hitmargins hitmargins-perfect item">1859</td>
+                        <td class="hitmargins hitmargins-lateperfect item">75</td>
+                        <td class="hitmargins hitmargins-late item">40</td>
+                        <td class="hitmargins hitmargins-miss item">38</td>
+                        <td class="accuracy item">96.02%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-12">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">37</td>
+                        <td class="hitmargins hitmargins-tooearly item">104</td>
+                        <td class="hitmargins hitmargins-early item">56</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">60</td>
+                        <td class="hitmargins hitmargins-perfect item">1195(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">73</td>
+                        <td class="hitmargins hitmargins-late item">54</td>
+                        <td class="hitmargins hitmargins-miss item">109</td>
+                        <td class="accuracy item">80.79%</td>
+                    </tr>
+                </tbody>
+                <tbody class="board" id="group-1">
+                    <tr class="box" id="dataRow-0-0-13">
+                        <td class="number item" rowspan="12">#13</td>
+                        <td class="name item" rowspan="3">到处乱跑的隐藏者</td>
+                        <td class="map title item">A</td>
+                        <td class="map item">Plum</td>
+                        <td class="map item">N</td>
+                        <td class="hitmargins hitmargins-miss title item">21</td>
+                        <td class="hitmargins hitmargins-tooearly item">129</td>
+                        <td class="hitmargins hitmargins-early item">70</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">54</td>
+                        <td class="hitmargins hitmargins-perfect item">1754</td>
+                        <td class="hitmargins hitmargins-lateperfect item">131</td>
+                        <td class="hitmargins hitmargins-late item">77</td>
+                        <td class="hitmargins hitmargins-miss clean item">1270</td>
+                        <td class="accuracy item">83.61%</td>
+                        <td class="totalaccuracy item" rowspan="12">256.37%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-1-13">
+                        <td class="map title item">B</td>
+                        <td class="map item">F-777</td>
+                        <td class="map item">Ludicrous Speed</td>
+                        <td class="hitmargins hitmargins-miss title item">2</td>
+                        <td class="hitmargins hitmargins-tooearly item">45</td>
+                        <td class="hitmargins hitmargins-early item">35</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">33</td>
+                        <td class="hitmargins hitmargins-perfect item">1905</td>
+                        <td class="hitmargins hitmargins-lateperfect item">77</td>
+                        <td class="hitmargins hitmargins-late item">45</td>
+                        <td class="hitmargins hitmargins-miss item">38</td>
+                        <td class="accuracy item">93.05%</td>
+                    </tr>
+                    <tr class="box" id="dataRow-0-2-13">
+                        <td class="map title item">C</td>
+                        <td class="map item">Halv</td>
+                        <td class="map item">火竜一角</td>
+                        <td class="hitmargins hitmargins-miss title item">50</td>
+                        <td class="hitmargins hitmargins-tooearly item">103</td>
+                        <td class="hitmargins hitmargins-early item">100</td>
+                        <td class="hitmargins hitmargins-earlyperfect item">37</td>
+                        <td class="hitmargins hitmargins-perfect item">1168(31)</td>
+                        <td class="hitmargins hitmargins-lateperfect item">68</td>
+                        <td class="hitmargins hitmargins-late item">104</td>
+                        <td class="hitmargins hitmargins-miss item">70</td>
+                        <td class="accuracy item">79.69%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </table>
+</div>
+
+
+<script>
+    function loadGroup(requestLink, group) {
+        // Clear existing leaderboard data
+        $(".board").remove();
+
+        // Create and append form for data request
+        createAndAppendForm(requestLink, group);
+    }
+
+    function createAndAppendForm(requestLink, group) {
+        let form = $("<form method='GET' id='data-form'></form>").attr({ "action": requestLink + "/" + group });
+        $("#leaderboard").append(form);
+
+        // Configure form to handle AJAX submission
+        form.ajaxForm({ complete: handleDataResponse });
+
+        form.submit();
+        form.remove();
+    }
+
+    function handleDataResponse(data) {
+        let jsonArray = JSON.parse(data.responseText);
+        jsonArray.forEach((playerData, index) => {
+            let rank = index + 1;
+            appendPlayerRank(playerData, rank);
+        });
+    }
+
+    function appendPlayerRank(playerData, rank) {
+        // Create and append player data rows
+        let clazz = "board";
+        if(rank === 16){
+            clazz += " passing-line";
+        }
+        let $tbody = $("<tbody class='" + clazz + "' id='body-" + rank + "'></tbody>");
+        $("#leaderboard").append($tbody);
+
+        // Append rows for player data
+        let totalScore = 0;
+        totalScore += appendPlayerDataRow(playerData, rank, $tbody, 1); // First row
+        if(currentGroup === "A"){
+            totalScore += appendPlayerDataRow(playerData, rank, $tbody, 2); // Second row A
+        } else {
+            totalScore += appendPlayerDataRow(playerData, rank, $tbody, 3); // Second row B
+        }
+
+        $("#row1-" + rank).append($("<td class='score item' rowspan='3'>" + totalScore.toFixed(4) + "</td>"));
+    }
+
+    function appendPlayerDataRow(playerData, rank, $tbody, rowNumber) {
+        let $row = $("<tr class='box' id='row" + rowNumber + "-" + rank + "'></tr>");
+        $tbody.append($row);
+
+        // Populate player info
+        if (rowNumber === 1) {
+            $row.append($("<td class='number item' rowspan='3'>#" + rank + "</td>"));
+            $row.append($("<td class='name item' rowspan='3'>" + playerData.displayName + "</td>"));
+        }
+
+        // Populate data in the row
+        if (rowNumber === 1) {
+            $row.append($("<td class='map item'>" + "Sanctuary" + "</td>"));
+        } else if (rowNumber === 2) {
+            $row.append($("<td class='map item'>" + "Caged Empty" + "</td>"));
+        } else if (rowNumber === 3) {
+            $row.append($("<td class='map item'>" + "Forever Friends" + "</td>"));
+        }
+
+        // Append hit margins and accuracy data
+        return appendHitMarginsAndAccuracy(playerData, rank, $row, rowNumber);
+    }
+
+    function appendHitMarginsAndAccuracy(playerData, rank, $row, rowNumber) {
+        if(playerData.hasOwnProperty("xAcc_" + rowNumber)){
+            // Iterate over hit margin data and append to the row
+            let array = [9, 0, 1, 2, 3, 4, 5, 6, 8];
+            for (let element of array) {
+                let i = parseInt(element);
+
+                let hitMarginClass = getHitMarginClass(i);
+                let hitMarginValue = playerData["hitMargins_" + rowNumber][i];
+
+                if (hitMarginValue === 0 || hitMarginValue === "0") {
+                    $row.append($("<td class='hitmargins " + hitMarginClass + " clean item'>" + hitMarginValue + "</td>"));
+                } else {
+                    $row.append($("<td class='hitmargins " + hitMarginClass + " item'>" + hitMarginValue + "</td>"));
+                }
+            }
+
+            // Append accuracy data
+            let accuracy = (playerData["xAcc_" + rowNumber] * 100).toFixed(4);
+            if (accuracy === "100.0000") {
+                $row.append($("<td class='xaccuracy pureperfect item'>" + "100.000%" + "</td>"));
+            } else {
+                $row.append($("<td class='xaccuracy item'>" + accuracy + "%" + "</td>"));
+            }
+
+            let score = (playerData["score_" + rowNumber] * 100).toFixed(4);
+            $row.append($("<td class='score item'>" + score + "</td>"));
+
+            return parseFloat(score);
+        }else{
+            $row.append($("<td class='nodata item' colspan='11'>" + "暂无数据" + "</td>"));
+            return 0;
+        }
+    }
+
+    function getHitMarginClass(index) {
+        // Returns the CSS class based on the hit margin index
+        switch (index) {
+            case 0: return 'hitmargins-tooearly';
+            case 1: return 'hitmargins-early';
+            case 2: return 'hitmargins-earlyperfect';
+            case 3: return 'hitmargins-perfect';
+            case 4: return 'hitmargins-lateperfect';
+            case 5: return 'hitmargins-late';
+            case 6: return 'hitmargins-toolate';
+            case 8: return 'hitmargins-miss';
+            case 9: return 'hitmargins-overload';
+            default: return '';
+        }
+    }
+    function setWidth() {
+            if (window.innerWidth < 1400 || window.innerWidth < window.innerHeight) {
+                $("#leaderboard").css("width", $(document.body).width());
+                $("#headline").css("width", $(document.body).width() - 6);
+            } else {
+                $("#leaderboard").css("width", ($(document.body).width()) * 0.6);
+                $("#headline").css("width", ($(document.body).width() - 6) * 0.6);
+            }
+        }
+
+
+
+
+</script>
+
+</body></html>
